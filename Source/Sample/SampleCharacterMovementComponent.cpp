@@ -78,6 +78,19 @@ void USampleCharacterMovementComponent::UpdateCharacterStateBeforeMovement(float
     }
 }
 
+void USampleCharacterMovementComponent::UpdateCharacterStateAfterMovement(float DeltaSeconds)
+{
+    // Proxies get replicated climb state.
+    if (CharacterOwner->GetLocalRole() != ROLE_SimulatedProxy)
+    {
+        // Unclimb if no longer allowed to be climbing
+        if (IsClimbing() && !CanClimbInCurrentState())
+        {
+            UnClimb(false);
+        }
+    }
+}
+
 bool USampleCharacterMovementComponent::CanClimbInCurrentState() const
 {
     return bClimbEnabled && ClimbTimer <= 0.0f && UpdatedComponent && !UpdatedComponent->IsSimulatingPhysics();
@@ -190,6 +203,11 @@ FNetworkPredictionData_Client* USampleCharacterMovementComponent::GetPredictionD
 
 void USampleCharacterMovementComponent::UpdateFromCompressedFlags(uint8 Flags)
 {
+    if (!CharacterOwner)
+    {
+        return;
+    }
+
     Super::UpdateFromCompressedFlags(Flags);
 
     bWantsToClimb = ((Flags & FSavedMove_SampleCharacter::FLAG_ClimbPressed) != 0);
@@ -198,6 +216,7 @@ void USampleCharacterMovementComponent::UpdateFromCompressedFlags(uint8 Flags)
 FSavedMove_SampleCharacter::FSavedMove_SampleCharacter()
     : ClimbTimer(0.0f)
     , bWantsToClimb(false)
+    , ClimbTimerThresholdCombine(0.01f)
 {}
 
 FSavedMove_SampleCharacter::~FSavedMove_SampleCharacter()
@@ -251,6 +270,21 @@ bool FSavedMove_SampleCharacter::CanCombineWith(const FSavedMovePtr& NewMove, AC
 {
     const FSavedMove_SampleCharacter* SampleNewMove = (FSavedMove_SampleCharacter*)&NewMove;
 
+    if (!FMath::IsNearlyEqual(ClimbTimer, SampleNewMove->ClimbTimer, ClimbTimerThresholdCombine))
+    {
+        return false;
+    }
+
+    if ((ClimbTimer <= 0.0f) != (SampleNewMove->ClimbTimer <= 0.0f))
+    {
+        return false;
+    }
+
+    if ((ClimbTimer > 0.0f) != (SampleNewMove->ClimbTimer > 0.0f))
+    {
+        return false;
+    }
+
     if (bWantsToClimb != SampleNewMove->bWantsToClimb)
     {
         return false;
@@ -263,7 +297,7 @@ bool FSavedMove_SampleCharacter::IsImportantMove(const FSavedMovePtr& LastAckedM
 {
     const FSavedMove_SampleCharacter* SampleLastAckedMove = (FSavedMove_SampleCharacter*)&LastAckedMove;
 
-    if (bWantsToClimb != SampleLastAckedMove->bWantsToClimb)
+    if (!FMath::IsNearlyEqual(ClimbTimer, SampleLastAckedMove->ClimbTimer, ClimbTimerThresholdCombine))
     {
         return true;
     }

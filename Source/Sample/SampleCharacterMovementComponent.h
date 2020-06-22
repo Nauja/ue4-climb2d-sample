@@ -26,6 +26,7 @@ public:
     virtual bool DoJump(bool bReplayingMoves) override;
     /** Apply bWantsToClimb before movement */
     virtual void UpdateCharacterStateBeforeMovement(float DeltaSeconds) override;
+    virtual void UpdateCharacterStateAfterMovement(float DeltaSeconds) override;
     /** Allow to climb or not */
     virtual bool CanClimbInCurrentState() const;
     /** If we are in the MOVE_Climbing movement mode */
@@ -84,6 +85,7 @@ public:
 
     float ClimbTimer;
     uint32 bWantsToClimb : 1;
+    float ClimbTimerThresholdCombine;
 
     virtual void Clear() override;
     virtual void SetMoveFor(ACharacter* Character, float InDeltaTime, FVector const& NewAccel, class FNetworkPredictionData_Client_Character& ClientData) override;
