@@ -251,11 +251,6 @@ bool FSavedMove_SampleCharacter::CanCombineWith(const FSavedMovePtr& NewMove, AC
 {
     const FSavedMove_SampleCharacter* SampleNewMove = (FSavedMove_SampleCharacter*)&NewMove;
 
-    if (ClimbTimer != SampleNewMove->ClimbTimer)
-    {
-        return false;
-    }
-
     if (bWantsToClimb != SampleNewMove->bWantsToClimb)
     {
         return false;
@@ -267,11 +262,6 @@ bool FSavedMove_SampleCharacter::CanCombineWith(const FSavedMovePtr& NewMove, AC
 bool FSavedMove_SampleCharacter::IsImportantMove(const FSavedMovePtr& LastAckedMove) const
 {
     const FSavedMove_SampleCharacter* SampleLastAckedMove = (FSavedMove_SampleCharacter*)&LastAckedMove;
-
-    if (ClimbTimer != SampleLastAckedMove->ClimbTimer)
-    {
-        return true;
-    }
 
     if (bWantsToClimb != SampleLastAckedMove->bWantsToClimb)
     {

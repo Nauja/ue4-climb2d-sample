@@ -20,5 +20,6 @@ void ASampleGameMode::BeginPlay()
 	if (Controller)
 	{
 		Controller->ConsoleCommand(TEXT("showflag.postprocessing 0"));
+		Controller->ConsoleCommand(TEXT("r.SetRes 512x448w"));
 	}
 }
