@@ -6,17 +6,19 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "SampleCharacterMovementComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "Camera/CameraComponent.h"
-#include "Interactables/SampleInteractableActor.h"
+#include "Net/UnrealNetwork.h"
 
 DEFINE_LOG_CATEGORY_STATIC(SideScrollerCharacter, Log, All);
 
 //////////////////////////////////////////////////////////////////////////
 // ASampleCharacter
 
-ASampleCharacter::ASampleCharacter()
+ASampleCharacter::ASampleCharacter(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<USampleCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	// Use only Yaw from the controller and ignore the rest of the rotation.
 	bUseControllerRotationPitch = false;
@@ -77,9 +79,18 @@ void ASampleCharacter::UpdateAnimation()
 	const FVector PlayerVelocity = GetVelocity();
 	const float PlayerSpeedSqr = PlayerVelocity.SizeSquared();
 
-	// Are we moving or standing still?
-	UPaperFlipbook* DesiredAnimation = (PlayerSpeedSqr > 0.0f) ? RunningAnimation : IdleAnimation;
-	if( GetSprite()->GetFlipbook() != DesiredAnimation 	)
+	UPaperFlipbook* DesiredAnimation = nullptr;
+	USampleCharacterMovementComponent* MoveComponent = Cast<USampleCharacterMovementComponent>(GetMovementComponent());
+	if (MoveComponent && MoveComponent->IsClimbing())
+	{
+		DesiredAnimation = (PlayerSpeedSqr > 0.0f) ? ClimbingRunningAnimation : ClimbingIdleAnimation;
+	}
+	else
+	{
+		DesiredAnimation = (PlayerSpeedSqr > 0.0f) ? RunningAnimation : IdleAnimation;
+	}
+
+	if(DesiredAnimation && GetSprite()->GetFlipbook() != DesiredAnimation 	)
 	{
 		GetSprite()->SetFlipbook(DesiredAnimation);
 	}
@@ -101,7 +112,8 @@ void ASampleCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 	// Note: the 'Jump' action and the 'MoveRight' axis are bound to actual keys/buttons/sticks in DefaultInput.ini (editable from Project Settings..Input)
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
-	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &ASampleCharacter::Interact);
+	PlayerInputComponent->BindAction("Climb", IE_Pressed, this, &ASampleCharacter::StartClimb);
+	PlayerInputComponent->BindAction("Climb", IE_Released, this, &ASampleCharacter::StopClimb);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ASampleCharacter::MoveRight);
 
 	PlayerInputComponent->BindTouch(IE_Pressed, this, &ASampleCharacter::TouchStarted);
@@ -134,7 +146,7 @@ void ASampleCharacter::UpdateCharacter()
 	UpdateAnimation();
 
 	// Now setup the rotation of the controller based on the direction we are travelling
-	const FVector PlayerVelocity = GetVelocity();	
+	const FVector PlayerVelocity = GetVelocity();
 	float TravelDirection = PlayerVelocity.X;
 	// Set the rotation so that the character faces his direction of travel.
 	if (Controller != nullptr)
@@ -150,31 +162,64 @@ void ASampleCharacter::UpdateCharacter()
 	}
 }
 
-void ASampleCharacter::Interact()
+void ASampleCharacter::SetClimbEnabled(bool bIsEnabled)
 {
-	if (GetLocalRole() < ROLE_Authority) {
-		/** If not server */
-		Server_Interact();
-	}
-	else
+	USampleCharacterMovementComponent* MoveComponent = Cast<USampleCharacterMovementComponent>(GetMovementComponent());
+
+	if (MoveComponent)
 	{
-		/** If server */
-		TSet<AActor*> Actors;
-		GetOverlappingActors(Actors, TSubclassOf<ASampleInteractableActor>());
-		for (auto Actor : Actors)
+		MoveComponent->bClimbEnabled = bIsEnabled;
+	}
+}
+
+void ASampleCharacter::StartClimb()
+{
+	Climb();
+}
+
+void ASampleCharacter::StopClimb()
+{
+	UnClimb();
+}
+
+bool ASampleCharacter::CanClimb() const
+{
+	USampleCharacterMovementComponent* MoveComponent = Cast<USampleCharacterMovementComponent>(GetMovementComponent());
+
+	if (!MoveComponent || MoveComponent->IsClimbing() || !MoveComponent->CanEverClimb())
+		return false;
+	
+	return GetRootComponent() && !GetRootComponent()->IsSimulatingPhysics();
+}
+
+void ASampleCharacter::Climb(bool bClientSimulation)
+{
+	USampleCharacterMovementComponent* MoveComponent = Cast<USampleCharacterMovementComponent>(GetMovementComponent());
+
+	if (MoveComponent)
+	{
+		if (CanClimb())
 		{
-			static_cast<ASampleInteractableActor*>(Actor)->Interact(this);
+			MoveComponent->bWantsToClimb = true;
 		}
 	}
 }
 
-bool ASampleCharacter::Server_Interact_Validate()
+void ASampleCharacter::UnClimb(bool bClientSimulation)
 {
-	return true;
+	USampleCharacterMovementComponent* MoveComponent = Cast<USampleCharacterMovementComponent>(GetMovementComponent());
+
+	if (MoveComponent)
+	{
+		MoveComponent->bWantsToClimb = false;
+	}
 }
 
-/** RPC called on server from client */
-void ASampleCharacter::Server_Interact_Implementation()
+
+void ASampleCharacter::OnEndClimb()
 {
-	Interact();
+}
+
+void ASampleCharacter::OnStartClimb()
+{
 }

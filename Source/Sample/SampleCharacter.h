@@ -21,13 +21,48 @@ class ASampleCharacter : public APaperCharacter
 {
 	GENERATED_BODY()
 
-	/** Side view camera */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera, meta=(AllowPrivateAccess="true"))
-	class UCameraComponent* SideViewCameraComponent;
+public:
+	ASampleCharacter(const FObjectInitializer& ObjectInitializer);
 
-	UTextRenderComponent* TextComponent;
-	virtual void Tick(float DeltaSeconds) override;
+	/** Returns SideViewCameraComponent subobject **/
+	FORCEINLINE class UCameraComponent* GetSideViewCameraComponent() const { return SideViewCameraComponent; }
+
+	virtual void SetClimbEnabled(bool bIsEnabled);
+
+	/** Locally when user start pressing the Climb button */
+	UFUNCTION(BlueprintCallable, Category = Character)
+	virtual void StartClimb();
+
+	/** Locally when user stop pressing the Climb button */
+	UFUNCTION(BlueprintCallable, Category = Character)
+	virtual void StopClimb();
+
+	/** Request the character to start climbing. The request is processed on the next update of the SampleCharacterMovementComponent. */
+	UFUNCTION(BlueprintCallable, Category=Character, meta=(HidePin="bClientSimulation"))
+	virtual void Climb(bool bClientSimulation = false);
+
+	/** Request the character to stop climbing. The request is processed on the next update of the SampleCharacterMovementComponent. */
+	UFUNCTION(BlueprintCallable, Category=Character, meta=(HidePin="bClientSimulation"))
+	virtual void UnClimb(bool bClientSimulation = false);
+
+	/** @return true if this character is currently able to climb (and is not currently climbing) */
+	UFUNCTION(BlueprintCallable, Category=Character)
+	virtual bool CanClimb() const;
+
+	/** Called when Character stops climbing. Called on non-owned Characters through bIsClimbing replication. */
+	virtual void OnEndClimb();
+
+	/** Called when Character climbs. Called on non-owned Characters through bIsClimbing replication. */
+	virtual void OnStartClimb();
+
 protected:
+	void UpdateAnimation();
+	void MoveRight(float Value);
+	void UpdateCharacter();
+	void TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location);
+	void TouchStopped(const ETouchIndex::Type FingerIndex, const FVector Location);
+	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
+	
 	// The animation to play while running around
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Animations)
 	class UPaperFlipbook* RunningAnimation;
@@ -36,35 +71,19 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
 	class UPaperFlipbook* IdleAnimation;
 
-	/** Called to choose the correct animation to play based on the character's movement state */
-	void UpdateAnimation();
+	// The animation to play while climbing and running around
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Animations)
+	class UPaperFlipbook* ClimbingRunningAnimation;
 
-	/** Called for side to side input */
-	void MoveRight(float Value);
+	// The animation to play while climbing and idle (standing still)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
+	class UPaperFlipbook* ClimbingIdleAnimation;
 
-	void UpdateCharacter();
+private:
+	/** Side view camera */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera, meta=(AllowPrivateAccess="true"))
+	class UCameraComponent* SideViewCameraComponent;
 
-	/** Handle touch inputs. */
-	void TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location);
-
-	/** Handle touch stop event. */
-	void TouchStopped(const ETouchIndex::Type FingerIndex, const FVector Location);
-
-	// APawn interface
-	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
-	// End of APawn interface
-
-	/** Called when pressing Interact button */
-	UFUNCTION()
-	void Interact();
-
-	/** Called when pressing Interact button from client */
-	UFUNCTION(reliable, Server, WithValidation)
-	void Server_Interact();
-
-public:
-	ASampleCharacter();
-
-	/** Returns SideViewCameraComponent subobject **/
-	FORCEINLINE class UCameraComponent* GetSideViewCameraComponent() const { return SideViewCameraComponent; }
+	UTextRenderComponent* TextComponent;
+	virtual void Tick(float DeltaSeconds) override;
 };

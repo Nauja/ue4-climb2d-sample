@@ -10,8 +10,7 @@ public class Sample : ModuleRules
 
 		PublicIncludePaths.AddRange(new string[]
 		{
-			"Sample",
-			"Sample/Interactables"
+			"Sample"
 		});
 
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "Paper2D" });
