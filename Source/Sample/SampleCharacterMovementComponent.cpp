@@ -62,6 +62,15 @@ void USampleCharacterMovementComponent::UpdateCharacterStateBeforeMovement(float
 {
     Super::UpdateCharacterStateBeforeMovement(DeltaSeconds);
 
+    if (ClimbTimer > 0.0f)
+    {
+        ClimbTimer -= DeltaSeconds;
+        if (ClimbTimer < 0.0f)
+        {
+            ClimbTimer = 0.0f;
+        }
+    }
+
     // Proxies get replicated climb state.
     if (CharacterOwner->GetLocalRole() != ROLE_SimulatedProxy)
     {
@@ -134,16 +143,6 @@ void USampleCharacterMovementComponent::UnClimb(bool bClientSimulation)
     SetMovementMode(EMovementMode::MOVE_Falling);
     ClimbTimer = ClimbCooldown;
     Owner->OnEndClimb();
-}
-
-void USampleCharacterMovementComponent::StartNewPhysics(float deltaTime, int32 Iterations)
-{
-    if (ClimbTimer > 0.0f)
-    {
-        ClimbTimer -= deltaTime;
-    }
-
-    Super::StartNewPhysics(deltaTime, Iterations);
 }
 
 void USampleCharacterMovementComponent::PhysCustom(float deltaTime, int32 Iterations)
@@ -234,19 +233,17 @@ void FSavedMove_SampleCharacter::Clear()
 
 void FSavedMove_SampleCharacter::SetMoveFor(ACharacter* Character, float InDeltaTime, FVector const& NewAccel, class FNetworkPredictionData_Client_Character& ClientData)
 {
-    Super::SetMoveFor(Character, InDeltaTime, NewAccel, ClientData);
-
     // Character -> Save
     USampleCharacterMovementComponent* MoveComponent = Cast<USampleCharacterMovementComponent>(Character->GetMovementComponent());
 
     ClimbTimer = MoveComponent->ClimbTimer;
     bWantsToClimb = MoveComponent->bWantsToClimb;
+
+    Super::SetMoveFor(Character, InDeltaTime, NewAccel, ClientData);
 }
 
 void FSavedMove_SampleCharacter::PrepMoveFor(ACharacter* Character)
 {
-    Super::PrepMoveFor(Character);
-
     // Save -> Character
     USampleCharacterMovementComponent* MoveComponent = Cast<USampleCharacterMovementComponent>(Character->GetCharacterMovement());
     if (MoveComponent)
@@ -254,6 +251,8 @@ void FSavedMove_SampleCharacter::PrepMoveFor(ACharacter* Character)
         MoveComponent->ClimbTimer = ClimbTimer;
         MoveComponent->bWantsToClimb = bWantsToClimb;
     }
+
+    Super::PrepMoveFor(Character);
 }
 
 uint8 FSavedMove_SampleCharacter::GetCompressedFlags() const
@@ -287,12 +286,16 @@ bool FSavedMove_SampleCharacter::CanCombineWith(const FSavedMovePtr& NewMove, AC
         return false;
     }
 
-    if (bWantsToClimb != SampleNewMove->bWantsToClimb)
-    {
-        return false;
-    }
-
     return Super::CanCombineWith(NewMove, Character, MaxDelta);
+}
+
+void FSavedMove_SampleCharacter::CombineWith(const FSavedMove_Character* OldMove, ACharacter* InCharacter, APlayerController* PC, const FVector& OldStartLocation)
+{
+    const FSavedMove_SampleCharacter* SampleNewMove = (FSavedMove_SampleCharacter*)&OldMove;
+
+    ClimbTimer = SampleNewMove->ClimbTimer;
+
+    Super::CombineWith(OldMove, InCharacter, PC, OldStartLocation);
 }
 
 bool FSavedMove_SampleCharacter::IsImportantMove(const FSavedMovePtr& LastAckedMove) const

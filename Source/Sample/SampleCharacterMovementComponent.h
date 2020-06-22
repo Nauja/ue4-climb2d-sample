@@ -35,8 +35,6 @@ public:
     virtual void Climb(bool bClientSimulation);
     /** Change movement mode to MOVE_Falling */
     virtual void UnClimb(bool bClientSimulation);
-    /** Update the climbing timer */
-    virtual void StartNewPhysics(float deltaTime, int32 Iterations) override;
     /** Custom physics for MOVE_Climbing movement mode */
     virtual void PhysCustom(float deltaTime, int32 Iterations) override;
     virtual void PhysCustomClimbing(float deltaTime, int32 Iterations);
@@ -92,6 +90,7 @@ public:
     virtual void PrepMoveFor(ACharacter* Character) override;
     virtual uint8 GetCompressedFlags() const override;
     virtual bool CanCombineWith(const FSavedMovePtr& NewMove, ACharacter* Character, float MaxDelta) const override;
+    virtual void CombineWith(const FSavedMove_Character* OldMove, ACharacter* InCharacter, APlayerController* PC, const FVector& OldStartLocation) override;
     bool IsImportantMove(const FSavedMovePtr& LastAckedMove) const;
 
     enum CustomCompressedFlags : uint8
