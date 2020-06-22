@@ -116,9 +116,6 @@ void ASampleCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 	PlayerInputComponent->BindAction("Climb", IE_Released, this, &ASampleCharacter::StopClimb);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ASampleCharacter::MoveRight);
 	PlayerInputComponent->BindAxis("MoveUp", this, &ASampleCharacter::MoveUp);
-
-	PlayerInputComponent->BindTouch(IE_Pressed, this, &ASampleCharacter::TouchStarted);
-	PlayerInputComponent->BindTouch(IE_Released, this, &ASampleCharacter::TouchStopped);
 }
 
 void ASampleCharacter::MoveRight(float Value)
@@ -138,18 +135,6 @@ void ASampleCharacter::MoveUp(float Value)
 	{
 		AddMovementInput(FVector(0.0f, 0.0f, 1.0f), Value);
 	}
-}
-
-void ASampleCharacter::TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location)
-{
-	// Jump on any touch
-	Jump();
-}
-
-void ASampleCharacter::TouchStopped(const ETouchIndex::Type FingerIndex, const FVector Location)
-{
-	// Cease jumping once touch stopped
-	StopJumping();
 }
 
 void ASampleCharacter::UpdateCharacter()

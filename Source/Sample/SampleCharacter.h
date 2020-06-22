@@ -60,8 +60,6 @@ protected:
 	void MoveRight(float Value);
 	void MoveUp(float Value);
 	void UpdateCharacter();
-	void TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location);
-	void TouchStopped(const ETouchIndex::Type FingerIndex, const FVector Location);
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 	
 	// The animation to play while running around

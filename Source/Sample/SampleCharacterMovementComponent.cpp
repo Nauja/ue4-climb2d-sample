@@ -41,6 +41,23 @@ bool USampleCharacterMovementComponent::CanAttemptJump() const
     return Super::CanAttemptJump();
 }
 
+bool USampleCharacterMovementComponent::DoJump(bool bReplayingMoves)
+{
+    bool bWasClimbing = IsClimbing();
+
+    if (Super::DoJump(bReplayingMoves))
+    {
+        if (bWasClimbing)
+        {
+            ClimbTimer = ClimbCooldown;
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
 void USampleCharacterMovementComponent::UpdateCharacterStateBeforeMovement(float DeltaSeconds)
 {
     Super::UpdateCharacterStateBeforeMovement(DeltaSeconds);
@@ -86,6 +103,7 @@ void USampleCharacterMovementComponent::Climb(bool bClientSimulation)
     ASampleCharacter* Owner = StaticCast<ASampleCharacter*>(CharacterOwner);
     SetMovementMode(EMovementMode::MOVE_Custom, (uint8)ESampleMovementMode::MOVE_Climbing);
     Velocity = FVector::ZeroVector;
+    Owner->ResetJumpState();
     Owner->OnStartClimb();
 }
 
@@ -150,12 +168,6 @@ void USampleCharacterMovementComponent::PhysCustomClimbing(float deltaTime, int3
     FHitResult Hit(1.f);
     SafeMoveUpdatedComponent(Adjusted, UpdatedComponent->GetComponentQuat(), true, Hit);
 
-    if (IsFalling())
-    {
-        // pawn decided to jump up
-        return;
-    }
-
     if (!bJustTeleported && !HasAnimRootMotion() && !CurrentRootMotion.HasOverrideVelocity())
     {
         Velocity = (UpdatedComponent->GetComponentLocation() - OldLocation) / deltaTime;
@@ -166,7 +178,6 @@ FNetworkPredictionData_Client* USampleCharacterMovementComponent::GetPredictionD
 {
     // Should only be called on client in network games
     check(CharacterOwner != NULL);
-    check(CharacterOwner->GetLocalRole() < ROLE_Authority);
 
     if (!ClientPredictionData)
     {
@@ -256,6 +267,11 @@ bool FSavedMove_SampleCharacter::CanCombineWith(const FSavedMovePtr& NewMove, AC
 bool FSavedMove_SampleCharacter::IsImportantMove(const FSavedMovePtr& LastAckedMove) const
 {
     const FSavedMove_SampleCharacter* SampleLastAckedMove = (FSavedMove_SampleCharacter*)&LastAckedMove;
+
+    if (ClimbTimer != SampleLastAckedMove->ClimbTimer)
+    {
+        return true;
+    }
 
     if (bWantsToClimb != SampleLastAckedMove->bWantsToClimb)
     {

@@ -16,6 +16,9 @@ void ASampleGameMode::BeginPlay()
 
 	// Allow to keep the true colors of sprites
 	APlayerController* Controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	check(Controller);
-	Controller->ConsoleCommand(TEXT("showflag.postprocessing 0"));
+
+	if (Controller)
+	{
+		Controller->ConsoleCommand(TEXT("showflag.postprocessing 0"));
+	}
 }

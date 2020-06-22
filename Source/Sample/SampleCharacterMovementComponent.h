@@ -23,6 +23,7 @@ public:
     virtual float GetMaxBrakingDeceleration() const;
     /** Allow to jump when climbing */
     virtual bool CanAttemptJump() const override;
+    virtual bool DoJump(bool bReplayingMoves) override;
     /** Apply bWantsToClimb before movement */
     virtual void UpdateCharacterStateBeforeMovement(float DeltaSeconds) override;
     /** Allow to climb or not */
