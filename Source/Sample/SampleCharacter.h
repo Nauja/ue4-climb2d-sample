@@ -58,6 +58,7 @@ public:
 protected:
 	void UpdateAnimation();
 	void MoveRight(float Value);
+	void MoveUp(float Value);
 	void UpdateCharacter();
 	void TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location);
 	void TouchStopped(const ETouchIndex::Type FingerIndex, const FVector Location);

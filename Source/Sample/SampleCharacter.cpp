@@ -115,6 +115,7 @@ void ASampleCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 	PlayerInputComponent->BindAction("Climb", IE_Pressed, this, &ASampleCharacter::StartClimb);
 	PlayerInputComponent->BindAction("Climb", IE_Released, this, &ASampleCharacter::StopClimb);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ASampleCharacter::MoveRight);
+	PlayerInputComponent->BindAxis("MoveUp", this, &ASampleCharacter::MoveUp);
 
 	PlayerInputComponent->BindTouch(IE_Pressed, this, &ASampleCharacter::TouchStarted);
 	PlayerInputComponent->BindTouch(IE_Released, this, &ASampleCharacter::TouchStopped);
@@ -126,6 +127,17 @@ void ASampleCharacter::MoveRight(float Value)
 
 	// Apply the input to the character motion
 	AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value);
+}
+
+void ASampleCharacter::MoveUp(float Value)
+{
+	// Can only move up if climbing
+	USampleCharacterMovementComponent* MoveComponent = Cast<USampleCharacterMovementComponent>(GetMovementComponent());
+
+	if (MoveComponent && MoveComponent->IsClimbing())
+	{
+		AddMovementInput(FVector(0.0f, 0.0f, 1.0f), Value);
+	}
 }
 
 void ASampleCharacter::TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location)
@@ -186,7 +198,7 @@ bool ASampleCharacter::CanClimb() const
 {
 	USampleCharacterMovementComponent* MoveComponent = Cast<USampleCharacterMovementComponent>(GetMovementComponent());
 
-	if (!MoveComponent || MoveComponent->IsClimbing() || !MoveComponent->CanEverClimb())
+	if (!MoveComponent || MoveComponent->IsClimbing())
 		return false;
 	
 	return GetRootComponent() && !GetRootComponent()->IsSimulatingPhysics();

@@ -5,6 +5,9 @@
 USampleCharacterMovementComponent::USampleCharacterMovementComponent(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
     , bClimbEnabled(false)
+    , BrakingDecelerationClimbing(0.0f)
+    , ClimbCooldown(0.0f)
+    , ClimbTimer(0.0f)
     , bWantsToClimb(false)
 {}
 
@@ -18,30 +21,24 @@ float USampleCharacterMovementComponent::GetMaxSpeed() const
     return Super::GetMaxSpeed();
 }
 
+float USampleCharacterMovementComponent::GetMaxBrakingDeceleration() const
+{
+    if (IsClimbing())
+    {
+        return BrakingDecelerationClimbing;
+    }
+
+    return Super::GetMaxBrakingDeceleration();
+}
+
 bool USampleCharacterMovementComponent::CanAttemptJump() const
 {
-    return IsJumpAllowed() &&
-        !bWantsToCrouch &&
-        (IsMovingOnGround() || IsFalling() || IsClimbing()); // Falling included for double-jump and non-zero jump hold time, but validated by character.
-}
-
-bool USampleCharacterMovementComponent::CheckFall(const FFindFloorResult& OldFloor, const FHitResult& Hit, const FVector& Delta, const FVector& OldLocation, float remainingTime, float timeTick, int32 Iterations, bool bMustJump)
-{
-/*    if (IsClimbing())
+    if (CanEverJump() && IsClimbing())
     {
-        return false;
-    }*/
+        return true;
+    }
 
-    return Super::CheckFall(OldFloor, Hit, Delta, OldLocation, remainingTime, timeTick, Iterations, bMustJump);
-}
-
-FVector USampleCharacterMovementComponent::NewFallVelocity(const FVector& InitialVelocity, const FVector& Gravity, float DeltaTime) const
-{
-/*    if (IsClimbing())
-    {
-        return FVector::ZeroVector;
-    }*/
-    return Super::NewFallVelocity(InitialVelocity, Gravity, DeltaTime);
+    return Super::CanAttemptJump();
 }
 
 void USampleCharacterMovementComponent::UpdateCharacterStateBeforeMovement(float DeltaSeconds)
@@ -66,7 +63,7 @@ void USampleCharacterMovementComponent::UpdateCharacterStateBeforeMovement(float
 
 bool USampleCharacterMovementComponent::CanClimbInCurrentState() const
 {
-    return bClimbEnabled && UpdatedComponent && !UpdatedComponent->IsSimulatingPhysics();
+    return bClimbEnabled && ClimbTimer <= 0.0f && UpdatedComponent && !UpdatedComponent->IsSimulatingPhysics();
 }
 
 bool USampleCharacterMovementComponent::IsClimbing() const
@@ -88,6 +85,7 @@ void USampleCharacterMovementComponent::Climb(bool bClientSimulation)
 
     ASampleCharacter* Owner = StaticCast<ASampleCharacter*>(CharacterOwner);
     SetMovementMode(EMovementMode::MOVE_Custom, (uint8)ESampleMovementMode::MOVE_Climbing);
+    Velocity = FVector::ZeroVector;
     Owner->OnStartClimb();
 }
 
@@ -100,11 +98,19 @@ void USampleCharacterMovementComponent::UnClimb(bool bClientSimulation)
 	}
 
     ASampleCharacter* Owner = StaticCast<ASampleCharacter*>(CharacterOwner);
-    if (!bClientSimulation)
-    {
-        SetMovementMode(EMovementMode::MOVE_Falling);
-    }
+    SetMovementMode(EMovementMode::MOVE_Falling);
+    ClimbTimer = ClimbCooldown;
     Owner->OnEndClimb();
+}
+
+void USampleCharacterMovementComponent::StartNewPhysics(float deltaTime, int32 Iterations)
+{
+    if (ClimbTimer > 0.0f)
+    {
+        ClimbTimer -= deltaTime;
+    }
+
+    Super::StartNewPhysics(deltaTime, Iterations);
 }
 
 void USampleCharacterMovementComponent::PhysCustom(float deltaTime, int32 Iterations)
@@ -126,75 +132,34 @@ void USampleCharacterMovementComponent::PhysCustomClimbing(float deltaTime, int3
 		return;
 	}
 
-	if (!CharacterOwner || (!CharacterOwner->Controller && !bRunPhysicsWithNoController && !HasAnimRootMotion() && !CurrentRootMotion.HasOverrideVelocity() && (CharacterOwner->GetLocalRole() != ROLE_SimulatedProxy)))
+    RestorePreAdditiveRootMotionVelocity();
+
+	// Apply acceleration
+	if (!HasAnimRootMotion() && !CurrentRootMotion.HasOverrideVelocity())
 	{
-		Acceleration = FVector::ZeroVector;
-		Velocity = FVector::ZeroVector;
-		return;
+		CalcVelocity(deltaTime, GroundFriction, false, GetMaxBrakingDeceleration());
 	}
 
-	bJustTeleported = false;
-	bool bCheckedFall = false;
-	bool bTriedLedgeMove = false;
-	float remainingTime = deltaTime;
+    ApplyRootMotionToVelocity(deltaTime);
 
-	// Perform the move
-	while ((remainingTime >= MIN_TICK_TIME) && (Iterations < MaxSimulationIterations) && CharacterOwner && (CharacterOwner->Controller || bRunPhysicsWithNoController || HasAnimRootMotion() || CurrentRootMotion.HasOverrideVelocity() || (CharacterOwner->GetLocalRole() == ROLE_SimulatedProxy)))
-	{
-		Iterations++;
-		bJustTeleported = false;
-		const float timeTick = GetSimulationTimeStep(remainingTime, Iterations);
-		remainingTime -= timeTick;
+    Iterations++;
+    bJustTeleported = false;
 
-		// Save current values
-		UPrimitiveComponent* const OldBase = GetMovementBase();
-		const FVector PreviousBaseLocation = (OldBase != NULL) ? OldBase->GetComponentLocation() : FVector::ZeroVector;
-		const FVector OldLocation = UpdatedComponent->GetComponentLocation();
-		const FFindFloorResult OldFloor = CurrentFloor;
+    FVector OldLocation = UpdatedComponent->GetComponentLocation();
+    const FVector Adjusted = Velocity * deltaTime;
+    FHitResult Hit(1.f);
+    SafeMoveUpdatedComponent(Adjusted, UpdatedComponent->GetComponentQuat(), true, Hit);
 
-		RestorePreAdditiveRootMotionVelocity();
+    if (IsFalling())
+    {
+        // pawn decided to jump up
+        return;
+    }
 
-		// Ensure velocity is horizontal.
-		MaintainHorizontalGroundVelocity();
-		const FVector OldVelocity = Velocity;
-		Acceleration.Z = 0.f;
-
-		// Apply acceleration
-		if (!HasAnimRootMotion() && !CurrentRootMotion.HasOverrideVelocity())
-		{
-			CalcVelocity(timeTick, GroundFriction, false, GetMaxBrakingDeceleration());
-		}
-
-		ApplyRootMotionToVelocity(timeTick);
-
-		// Compute move parameters
-		const FVector MoveVelocity = Velocity;
-		const FVector Delta = timeTick * MoveVelocity;
-		const bool bZeroDelta = Delta.IsNearlyZero();
-		FStepDownResult StepDownResult;
-
-		if (bZeroDelta)
-		{
-			remainingTime = 0.f;
-		}
-		else
-		{
-			// try to move forward
-			MoveAlongFloor(MoveVelocity, timeTick, &StepDownResult);
-		}
-
-		// If we didn't move at all this iteration then abort (since future iterations will also be stuck).
-		if (UpdatedComponent->GetComponentLocation() == OldLocation)
-		{
-			remainingTime = 0.f;
-			break;
-		}
-	}
-
-	if (IsMovingOnGround())
-	{
-		MaintainHorizontalGroundVelocity();
-	}
+    if (!bJustTeleported && !HasAnimRootMotion() && !CurrentRootMotion.HasOverrideVelocity())
+    {
+        Velocity = (UpdatedComponent->GetComponentLocation() - OldLocation) / deltaTime;
+    }
 }
 
 FNetworkPredictionData_Client* USampleCharacterMovementComponent::GetPredictionData_Client() const
@@ -220,7 +185,8 @@ void USampleCharacterMovementComponent::UpdateFromCompressedFlags(uint8 Flags)
 }
 
 FSavedMove_SampleCharacter::FSavedMove_SampleCharacter()
-    : bWantsToClimb(false)
+    : ClimbTimer(0.0f)
+    , bWantsToClimb(false)
 {}
 
 FSavedMove_SampleCharacter::~FSavedMove_SampleCharacter()
@@ -230,6 +196,7 @@ void FSavedMove_SampleCharacter::Clear()
 {
     Super::Clear();
 
+    ClimbTimer = 0.0f;
     bWantsToClimb = false;
 }
 
@@ -240,6 +207,7 @@ void FSavedMove_SampleCharacter::SetMoveFor(ACharacter* Character, float InDelta
     // Character -> Save
     USampleCharacterMovementComponent* MoveComponent = Cast<USampleCharacterMovementComponent>(Character->GetMovementComponent());
 
+    ClimbTimer = MoveComponent->ClimbTimer;
     bWantsToClimb = MoveComponent->bWantsToClimb;
 }
 
@@ -251,6 +219,7 @@ void FSavedMove_SampleCharacter::PrepMoveFor(ACharacter* Character)
     USampleCharacterMovementComponent* MoveComponent = Cast<USampleCharacterMovementComponent>(Character->GetCharacterMovement());
     if (MoveComponent)
     {
+        MoveComponent->ClimbTimer = ClimbTimer;
         MoveComponent->bWantsToClimb = bWantsToClimb;
     }
 }
@@ -270,6 +239,11 @@ uint8 FSavedMove_SampleCharacter::GetCompressedFlags() const
 bool FSavedMove_SampleCharacter::CanCombineWith(const FSavedMovePtr& NewMove, ACharacter* Character, float MaxDelta) const
 {
     const FSavedMove_SampleCharacter* SampleNewMove = (FSavedMove_SampleCharacter*)&NewMove;
+
+    if (ClimbTimer != SampleNewMove->ClimbTimer)
+    {
+        return false;
+    }
 
     if (bWantsToClimb != SampleNewMove->bWantsToClimb)
     {

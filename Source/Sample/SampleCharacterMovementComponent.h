@@ -17,18 +17,28 @@ class SAMPLE_API USampleCharacterMovementComponent : public UCharacterMovementCo
 public:
     USampleCharacterMovementComponent(const FObjectInitializer& ObjectInitializer);
 
+    /** Specify max speed when climbing */
     virtual float GetMaxSpeed() const override;
+    /** Specify max braking deceleration when climbing */
+    virtual float GetMaxBrakingDeceleration() const;
+    /** Allow to jump when climbing */
     virtual bool CanAttemptJump() const override;
-    virtual bool CheckFall(const FFindFloorResult& OldFloor, const FHitResult& Hit, const FVector& Delta, const FVector& OldLocation, float remainingTime, float timeTick, int32 Iterations, bool bMustJump) override;
-    virtual FVector NewFallVelocity(const FVector& InitialVelocity, const FVector& Gravity, float DeltaTime) const override;
+    /** Apply bWantsToClimb before movement */
     virtual void UpdateCharacterStateBeforeMovement(float DeltaSeconds) override;
+    /** Allow to climb or not */
     virtual bool CanClimbInCurrentState() const;
-    FORCEINLINE virtual bool CanEverClimb() const { return true; };
+    /** If we are in the MOVE_Climbing movement mode */
     virtual bool IsClimbing() const;
+    /** Change movement mode to MOVE_Climbing */
     virtual void Climb(bool bClientSimulation);
+    /** Change movement mode to MOVE_Falling */
     virtual void UnClimb(bool bClientSimulation);
+    /** Update the climbing timer */
+    virtual void StartNewPhysics(float deltaTime, int32 Iterations) override;
+    /** Custom physics for MOVE_Climbing movement mode */
     virtual void PhysCustom(float deltaTime, int32 Iterations) override;
     virtual void PhysCustomClimbing(float deltaTime, int32 Iterations);
+    /** Custom prediction data sent to client */
     virtual class FNetworkPredictionData_Client* GetPredictionData_Client() const override;
     virtual void UpdateFromCompressedFlags(uint8 Flags) override;
 
@@ -39,6 +49,23 @@ public:
 	/** The maximum climbing speed. */
 	UPROPERTY(Category="Character Movement: Climbing", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0"))
 	float MaxClimbSpeed;
+
+	/**
+	 * Deceleration when climbing and not applying acceleration.
+	 * @see MaxAcceleration
+	 */
+	UPROPERTY(Category="Character Movement: Climbing", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0"))
+	float BrakingDecelerationClimbing;
+
+    /**
+     * Cooldown before the character can climb again after leaving the climbing state by jumping.
+     */
+    UPROPERTY(Category = "Character Movement: Climbing", EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", UIMin = "0"))
+    float ClimbCooldown;
+
+    /** Remaining time before the character can climb again. */
+    UPROPERTY(Category = "Sample", VisibleInstanceOnly, BlueprintReadOnly)
+    float ClimbTimer;
 
     /** If true, try to climb (or keep climbing) on next update. If false, try to stop climbing on next update. */
     UPROPERTY(Category = "Sample", VisibleInstanceOnly, BlueprintReadOnly)
@@ -54,6 +81,7 @@ public:
     FSavedMove_SampleCharacter();
     virtual ~FSavedMove_SampleCharacter();
 
+    float ClimbTimer;
     uint32 bWantsToClimb : 1;
 
     virtual void Clear() override;
