@@ -159,6 +159,21 @@ void ASampleCharacter::UpdateCharacter()
 	}
 }
 
+void ASampleCharacter::AddClimbableVolume(ASampleClimbableVolume* Volume)
+{
+	Volumes.Add(Volume);
+	SetClimbEnabled(true);
+}
+
+void ASampleCharacter::RemoveClimbableVolume(ASampleClimbableVolume* Volume)
+{
+	Volumes.Remove(Volume);
+	if (Volumes.Num() == 0)
+	{
+		SetClimbEnabled(false);
+	}
+}
+
 void ASampleCharacter::SetClimbEnabled(bool bIsEnabled)
 {
 	USampleCharacterMovementComponent* MoveComponent = Cast<USampleCharacterMovementComponent>(GetMovementComponent());

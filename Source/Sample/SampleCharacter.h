@@ -7,6 +7,7 @@
 #include "SampleCharacter.generated.h"
 
 class UTextRenderComponent;
+class ASampleClimbableVolume;
 
 /**
  * This class is the default character for Sample, and it is responsible for all
@@ -27,6 +28,8 @@ public:
 	/** Returns SideViewCameraComponent subobject **/
 	FORCEINLINE class UCameraComponent* GetSideViewCameraComponent() const { return SideViewCameraComponent; }
 
+	virtual void AddClimbableVolume(ASampleClimbableVolume* Volume);
+	virtual void RemoveClimbableVolume(ASampleClimbableVolume* Volume);
 	virtual void SetClimbEnabled(bool bIsEnabled);
 
 	/** Locally when user start pressing the Climb button */
@@ -85,4 +88,8 @@ private:
 
 	UTextRenderComponent* TextComponent;
 	virtual void Tick(float DeltaSeconds) override;
+
+	/** Store overlapping volumes */
+	UPROPERTY(transient)
+	TSet<ASampleClimbableVolume*> Volumes;
 };
