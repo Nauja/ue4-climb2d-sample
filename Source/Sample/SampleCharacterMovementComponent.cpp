@@ -80,6 +80,8 @@ void USampleCharacterMovementComponent::UpdateCharacterStateBeforeMovement(float
 
 void USampleCharacterMovementComponent::UpdateCharacterStateAfterMovement(float DeltaSeconds)
 {
+    Super::UpdateCharacterStateAfterMovement(DeltaSeconds);
+
     // Proxies get replicated climb state.
     if (CharacterOwner->GetLocalRole() != ROLE_SimulatedProxy)
     {
