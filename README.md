@@ -72,6 +72,84 @@ void ASampleCharacter::RemoveClimbableVolume(ASampleClimbableVolume* Volume)
 }
 ```
 
+### Switching to climbing movement mode
+
+The climbing system works in a similar way to the crouching system. When pressing/releasing the
+`Climb` input, we toggle a boolean `bWantsToClimb` in the movement component:
+
+```cpp
+void ASampleCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
+{
+    ...
+    PlayerInputComponent->BindAction("Climb", IE_Pressed, this, &ASampleCharacter::StartClimb);
+    PlayerInputComponent->BindAction("Climb", IE_Released, this, &ASampleCharacter::StopClimb);
+    ...
+}
+
+void ASampleCharacter::StartClimb()
+{
+    USampleCharacterMovementComponent* MoveComponent = Cast<USampleCharacterMovementComponent>(GetMovementComponent());
+
+    if (MoveComponent)
+    {
+        if (CanClimb())
+        {
+            MoveComponent->bWantsToClimb = true;
+        }
+    }
+}
+
+void ASampleCharacter::StopClimb()
+{
+    USampleCharacterMovementComponent* MoveComponent = Cast<USampleCharacterMovementComponent>(GetMovementComponent());
+
+    if (MoveComponent)
+    {
+        MoveComponent->bWantsToClimb = false;
+    }
+}
+```
+
+This boolean is replicated and serve to effectively switch from/to our custom climbing movement mode:
+
+```cpp
+void USampleCharacterMovementComponent::UpdateCharacterStateBeforeMovement(float DeltaSeconds)
+{
+    Super::UpdateCharacterStateBeforeMovement(DeltaSeconds);
+    ...
+
+    // Proxies get replicated climb state.
+    if (CharacterOwner->GetLocalRole() != ROLE_SimulatedProxy)
+    {
+        // Check for a change in climb state. Players toggle climb by changing bWantsToClimb.
+        const bool bIsClimbing = IsClimbing();
+        if (bIsClimbing && (!bWantsToClimb || !CanClimbInCurrentState()))
+        {
+            UnClimb(false);
+        }
+        else if (!bIsClimbing && bWantsToClimb && CanClimbInCurrentState())
+        {
+            Climb(false);
+        }
+    }
+}
+
+void USampleCharacterMovementComponent::UpdateCharacterStateAfterMovement(float DeltaSeconds)
+{
+    Super::UpdateCharacterStateAfterMovement(DeltaSeconds);
+
+    // Proxies get replicated climb state.
+    if (CharacterOwner->GetLocalRole() != ROLE_SimulatedProxy)
+    {
+        // Unclimb if no longer allowed to be climbing
+        if (IsClimbing() && !CanClimbInCurrentState())
+        {
+            UnClimb(false);
+        }
+    }
+}
+```
+
 ### Credits
 
 Sprites are coming from [The Spriters Resource](https://www.spriters-resource.com/).
