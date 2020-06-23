@@ -19,9 +19,9 @@ Prerequisites:
   * [Pixel Perfect 2D Sample](https://github.com/Nauja/ue4-pixelperfect2d-sample)
 
 Features:
-  * wip
+  * Detecting when character can climb
 
-### Detecting when player can climb
+### Detecting when character can climb
 
 While the map is created with a TileMap, it is not used to identify the tiles that character can climb.
 Instead we use climbable volumes that are directly placed in the level to represent climbable surfaces:
