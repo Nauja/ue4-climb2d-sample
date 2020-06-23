@@ -24,7 +24,7 @@ Features:
 ### Detecting when character can climb
 
 While the map is created with a TileMap, it is not used to identify the tiles that character can climb.
-Instead we use climbable volumes that are directly placed in the level to represent climbable surfaces:
+Instead we use climbable volumes that are directly placed in the level to represent the climbable surfaces:
 
 ![Preview](https://github.com/Nauja/ue4-climb2d-sample/raw/master/docs/editor-climbable-volume.png)
 
