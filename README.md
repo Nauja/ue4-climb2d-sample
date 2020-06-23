@@ -20,6 +20,7 @@ Prerequisites:
 
 Features:
   * Detecting when character can climb
+  * Switching to climbing movement mode
 
 ### Detecting when character can climb
 
