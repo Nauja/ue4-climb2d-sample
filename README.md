@@ -53,6 +53,25 @@ void ASampleClimbableVolume::NotifyActorEndOverlap(class AActor* Other)
 }
 ```
 
+In `ASampleCharacter.cpp` we enable climbing if the character is overlapping at least one climbing volume:
+
+```cpp
+void ASampleCharacter::AddClimbableVolume(ASampleClimbableVolume* Volume)
+{
+    Volumes.Add(Volume);
+    SetClimbEnabled(true);
+}
+
+void ASampleCharacter::RemoveClimbableVolume(ASampleClimbableVolume* Volume)
+{
+    Volumes.Remove(Volume);
+    if (Volumes.Num() == 0)
+    {
+        SetClimbEnabled(false);
+    }
+}
+```
+
 ### Credits
 
 Sprites are coming from [The Spriters Resource](https://www.spriters-resource.com/).
