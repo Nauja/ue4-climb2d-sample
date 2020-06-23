@@ -22,6 +22,7 @@ Features:
   * Instructions
   * Detecting when character can climb
   * Switching to climbing movement mode
+  * Allowing to jump while climbing
 
 ### Instructions
 
@@ -185,6 +186,39 @@ void USampleCharacterMovementComponent::UpdateCharacterStateAfterMovement(float 
             UnClimb(false);
         }
     }
+}
+```
+
+### Allowing to jump while climbing
+
+Climbing is done by holding down the `Climb` input.
+
+```cpp
+bool USampleCharacterMovementComponent::CanAttemptJump() const
+{
+    if (CanEverJump() && IsClimbing())
+    {
+        return true;
+    }
+
+    return Super::CanAttemptJump();
+}
+
+bool USampleCharacterMovementComponent::DoJump(bool bReplayingMoves)
+{
+    bool bWasClimbing = IsClimbing();
+
+    if (Super::DoJump(bReplayingMoves))
+    {
+        if (bWasClimbing)
+        {
+            ClimbTimer = ClimbCooldown;
+        }
+
+        return true;
+    }
+
+    return false;
 }
 ```
 
