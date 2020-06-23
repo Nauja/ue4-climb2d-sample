@@ -110,7 +110,35 @@ void ASampleCharacter::StopClimb()
 }
 ```
 
-This boolean is replicated and serve to effectively switch from/to our custom climbing movement mode:
+This boolean is replicated to the server with a custom `FSavedMove` structure:
+
+```cpp
+void FSavedMove_SampleCharacter::SetMoveFor(ACharacter* Character, float InDeltaTime, FVector const& NewAccel, class FNetworkPredictionData_Client_Character& ClientData)
+{
+    // Character -> Save
+    USampleCharacterMovementComponent* MoveComponent = Cast<USampleCharacterMovementComponent>(Character->GetMovementComponent());
+
+    ...
+    bWantsToClimb = MoveComponent->bWantsToClimb;
+
+    Super::SetMoveFor(Character, InDeltaTime, NewAccel, ClientData);
+}
+
+void FSavedMove_SampleCharacter::PrepMoveFor(ACharacter* Character)
+{
+    // Save -> Character
+    USampleCharacterMovementComponent* MoveComponent = Cast<USampleCharacterMovementComponent>(Character->GetCharacterMovement());
+    if (MoveComponent)
+    {
+        ...
+        MoveComponent->bWantsToClimb = bWantsToClimb;
+    }
+
+    Super::PrepMoveFor(Character);
+}
+```
+
+And is used to switch from/to our custom climbing movement mode:
 
 ```cpp
 void USampleCharacterMovementComponent::UpdateCharacterStateBeforeMovement(float DeltaSeconds)
