@@ -10,6 +10,16 @@ Sample of a custom climbing movement done with Paper2D.
 This project is an example of how to write a custom climbing movement in a Paper2D game, with the constraint of
 being fully replicated over network.
 
+Prerequisites:
+  * [Pixel Perfect 2D Sample](https://github.com/Nauja/ue4-pixelperfect2d-sample)
+
+Features:
+  * Instructions
+  * Detecting when character can climb
+  * Switching to climbing movement mode
+
+### Instructions
+
 Keyboard/Gamepad controls:
   * Z(A)QSD/Left Thumbstick: move
   * Space/Face Bottom Button: jump
@@ -20,13 +30,6 @@ Releasing this input or moving out of a grid while climbing will immediatly make
 It is possible to jump while climbing. If so, the character will have a slight cooldown before climbing again.
 
 It is encouraged to test the climbing system in multiplayer with `Net PktLag=X`, `Net PktLoss=X`, `Net PktOrder=X` debug commands.
-
-Prerequisites:
-  * [Pixel Perfect 2D Sample](https://github.com/Nauja/ue4-pixelperfect2d-sample)
-
-Features:
-  * Detecting when character can climb
-  * Switching to climbing movement mode
 
 ### Detecting when character can climb
 
