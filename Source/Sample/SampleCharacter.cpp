@@ -118,8 +118,6 @@ void ASampleCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 
 void ASampleCharacter::MoveRight(float Value)
 {
-	/*UpdateChar();*/
-
 	// Apply the input to the character motion
 	AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value);
 }
