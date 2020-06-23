@@ -192,7 +192,7 @@ void USampleCharacterMovementComponent::UpdateCharacterStateAfterMovement(float 
 ### Allowing to jump while climbing
 
 Climbing is done by holding down the `Climb` input, and it is possible de jump while climbing.
-This is done by setting a climbing cooldown in `DoJump` to prevent the character from re-entering the climbing state right after:
+This is done by adding a climbing cooldown in `DoJump` to prevent the character from re-entering the climbing state right after:
 
 ```cpp
 bool USampleCharacterMovementComponent::CanClimbInCurrentState() const
