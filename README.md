@@ -10,6 +10,11 @@ Sample of a custom climbing movement done with Paper2D.
 This project is an example of how to write a custom climbing movement in a Paper2D game, with the constraint of
 being fully replicated over network.
 
+Keyboard/Gamepad controls:
+  * Z(A)QSD/Left Thumbstick: move
+  * Space/Face Bottom Button: jump
+  * Left CTRL/Right Trigger (hold): climb
+
 Prerequisites:
   * [Pixel Perfect 2D Sample](https://github.com/Nauja/ue4-pixelperfect2d-sample)
 
@@ -19,11 +24,6 @@ Features:
   * Switching to climbing movement mode
 
 ### Instructions
-
-Keyboard/Gamepad controls:
-  * Z(A)QSD/Left Thumbstick: move
-  * Space/Face Bottom Button: jump
-  * Left CTRL/Right Trigger (hold): climb
 
 To climb you have to maintain Left CTRL/Right Trigger the whole time.
 Releasing this input or moving out of a grid while climbing will immediatly make the character fall.
