@@ -40,23 +40,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Character)
 	virtual void StopClimb();
 
-	/** Request the character to start climbing. The request is processed on the next update of the SampleCharacterMovementComponent. */
-	UFUNCTION(BlueprintCallable, Category=Character, meta=(HidePin="bClientSimulation"))
-	virtual void Climb(bool bClientSimulation = false);
-
-	/** Request the character to stop climbing. The request is processed on the next update of the SampleCharacterMovementComponent. */
-	UFUNCTION(BlueprintCallable, Category=Character, meta=(HidePin="bClientSimulation"))
-	virtual void UnClimb(bool bClientSimulation = false);
-
 	/** @return true if this character is currently able to climb (and is not currently climbing) */
 	UFUNCTION(BlueprintCallable, Category=Character)
 	virtual bool CanClimb() const;
-
-	/** Called when Character stops climbing. Called on non-owned Characters through bIsClimbing replication. */
-	virtual void OnEndClimb();
-
-	/** Called when Character climbs. Called on non-owned Characters through bIsClimbing replication. */
-	virtual void OnStartClimb();
 
 protected:
 	void UpdateAnimation();

@@ -128,7 +128,6 @@ void USampleCharacterMovementComponent::Climb(bool bClientSimulation)
     SetMovementMode(EMovementMode::MOVE_Custom, (uint8)ESampleMovementMode::MOVE_Climbing);
     Velocity = FVector::ZeroVector;
     Owner->ResetJumpState();
-    Owner->OnStartClimb();
 }
 
 
@@ -142,7 +141,6 @@ void USampleCharacterMovementComponent::UnClimb(bool bClientSimulation)
     ASampleCharacter* Owner = StaticCast<ASampleCharacter*>(CharacterOwner);
     SetMovementMode(EMovementMode::MOVE_Falling);
     ClimbTimer = ClimbCooldown;
-    Owner->OnEndClimb();
 }
 
 void USampleCharacterMovementComponent::PhysCustom(float deltaTime, int32 Iterations)

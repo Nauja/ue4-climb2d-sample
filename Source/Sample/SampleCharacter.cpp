@@ -12,8 +12,6 @@
 #include "Camera/CameraComponent.h"
 #include "Net/UnrealNetwork.h"
 
-DEFINE_LOG_CATEGORY_STATIC(SideScrollerCharacter, Log, All);
-
 //////////////////////////////////////////////////////////////////////////
 // ASampleCharacter
 
@@ -186,26 +184,6 @@ void ASampleCharacter::SetClimbEnabled(bool bIsEnabled)
 
 void ASampleCharacter::StartClimb()
 {
-	Climb();
-}
-
-void ASampleCharacter::StopClimb()
-{
-	UnClimb();
-}
-
-bool ASampleCharacter::CanClimb() const
-{
-	USampleCharacterMovementComponent* MoveComponent = Cast<USampleCharacterMovementComponent>(GetMovementComponent());
-
-	if (!MoveComponent || MoveComponent->IsClimbing())
-		return false;
-	
-	return GetRootComponent() && !GetRootComponent()->IsSimulatingPhysics();
-}
-
-void ASampleCharacter::Climb(bool bClientSimulation)
-{
 	USampleCharacterMovementComponent* MoveComponent = Cast<USampleCharacterMovementComponent>(GetMovementComponent());
 
 	if (MoveComponent)
@@ -217,7 +195,7 @@ void ASampleCharacter::Climb(bool bClientSimulation)
 	}
 }
 
-void ASampleCharacter::UnClimb(bool bClientSimulation)
+void ASampleCharacter::StopClimb()
 {
 	USampleCharacterMovementComponent* MoveComponent = Cast<USampleCharacterMovementComponent>(GetMovementComponent());
 
@@ -227,11 +205,12 @@ void ASampleCharacter::UnClimb(bool bClientSimulation)
 	}
 }
 
-
-void ASampleCharacter::OnEndClimb()
+bool ASampleCharacter::CanClimb() const
 {
-}
+	USampleCharacterMovementComponent* MoveComponent = Cast<USampleCharacterMovementComponent>(GetMovementComponent());
 
-void ASampleCharacter::OnStartClimb()
-{
+	if (!MoveComponent || MoveComponent->IsClimbing())
+		return false;
+	
+	return GetRootComponent() && !GetRootComponent()->IsSimulatingPhysics();
 }
