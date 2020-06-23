@@ -17,6 +17,7 @@ Features:
   * Instructions
   * Detecting when character can climb
   * Switching to climbing movement mode
+  * Moving while climbing
   * Allowing to jump while climbing
 
 ### Instructions
@@ -186,6 +187,108 @@ void USampleCharacterMovementComponent::UpdateCharacterStateAfterMovement(float 
             UnClimb(false);
         }
     }
+}
+```
+
+### Moving while climbing
+
+Entering the climbing state set a custom movement mode:
+
+```cpp
+SetMovementMode(EMovementMode::MOVE_Custom, (uint8)ESampleMovementMode::MOVE_Climbing);
+```
+
+In this mode, all the physics is handled in `PhysCustomClimbing` that is merely a copy of `PhysFlying`:
+
+```cpp
+void USampleCharacterMovementComponent::PhysCustomClimbing(float deltaTime, int32 Iterations)
+{
+    if (deltaTime < MIN_TICK_TIME)
+    {
+        return;
+    }
+
+    RestorePreAdditiveRootMotionVelocity();
+
+    // Apply acceleration
+    if (!HasAnimRootMotion() && !CurrentRootMotion.HasOverrideVelocity())
+    {
+        CalcVelocity(deltaTime, GroundFriction, false, GetMaxBrakingDeceleration());
+    }
+
+    ApplyRootMotionToVelocity(deltaTime);
+
+    Iterations++;
+    bJustTeleported = false;
+
+    FVector OldLocation = UpdatedComponent->GetComponentLocation();
+    const FVector Adjusted = Velocity * deltaTime;
+    FHitResult Hit(1.f);
+    SafeMoveUpdatedComponent(Adjusted, UpdatedComponent->GetComponentQuat(), true, Hit);
+
+    if (!bJustTeleported && !HasAnimRootMotion() && !CurrentRootMotion.HasOverrideVelocity())
+    {
+        Velocity = (UpdatedComponent->GetComponentLocation() - OldLocation) / deltaTime;
+    }
+}
+```
+
+The important part is to override `GetMaxSpeed` and `GetMaxBrakingDeceleration` functions:
+
+```cpp
+float USampleCharacterMovementComponent::GetMaxSpeed() const
+{
+    if (IsClimbing())
+    {
+        return MaxClimbSpeed;
+    }
+
+    return Super::GetMaxSpeed();
+}
+
+float USampleCharacterMovementComponent::GetMaxBrakingDeceleration() const
+{
+    if (IsClimbing())
+    {
+        return BrakingDecelerationClimbing;
+    }
+
+    return Super::GetMaxBrakingDeceleration();
+}
+```
+
+Inputs are handled by `ASampleCharacter`:
+
+```cpp
+
+void ASampleCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
+{
+	// Note: the 'Jump' action and the 'MoveRight' axis are bound to actual keys/buttons/sticks in DefaultInput.ini (editable from Project Settings..Input)
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("Climb", IE_Pressed, this, &ASampleCharacter::StartClimb);
+	PlayerInputComponent->BindAction("Climb", IE_Released, this, &ASampleCharacter::StopClimb);
+	PlayerInputComponent->BindAxis("MoveRight", this, &ASampleCharacter::MoveRight);
+	PlayerInputComponent->BindAxis("MoveUp", this, &ASampleCharacter::MoveUp);
+}
+
+void ASampleCharacter::MoveRight(float Value)
+{
+	/*UpdateChar();*/
+
+	// Apply the input to the character motion
+	AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value);
+}
+
+void ASampleCharacter::MoveUp(float Value)
+{
+	// Can only move up if climbing
+	USampleCharacterMovementComponent* MoveComponent = Cast<USampleCharacterMovementComponent>(GetMovementComponent());
+
+	if (MoveComponent && MoveComponent->IsClimbing())
+	{
+		AddMovementInput(FVector(0.0f, 0.0f, 1.0f), Value);
+	}
 }
 ```
 
