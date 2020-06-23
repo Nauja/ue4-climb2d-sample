@@ -15,6 +15,12 @@ Keyboard/Gamepad controls:
   * Space/Face Bottom Button: jump
   * Left CTRL/Right Trigger (hold): climb
 
+To climb you have to maintain Left CTRL/Right Trigger the whole time.
+Releasing this input or moving out of a grid while climbing will immediatly make the character fall.
+It is possible to jump while climbing. If so, the character will have a slight cooldown before climbing again.
+
+It is encouraged to test the climbing system in multiplayer with `Net PktLag=X`, `Net PktLoss=X`, `Net PktOrder=X` debug commands.
+
 Prerequisites:
   * [Pixel Perfect 2D Sample](https://github.com/Nauja/ue4-pixelperfect2d-sample)
 
