@@ -257,7 +257,7 @@ float USampleCharacterMovementComponent::GetMaxBrakingDeceleration() const
 }
 ```
 
-Inputs are handled by `ASampleCharacter`:
+Inputs are handled in `ASampleCharacter.cpp`:
 
 ```cpp
 
