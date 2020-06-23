@@ -294,8 +294,8 @@ void ASampleCharacter::MoveUp(float Value)
 
 ### Allowing to jump while climbing
 
-Climbing is done by holding down the `Climb` input, and it is possible de jump while climbing.
-This is done by adding a climbing cooldown in `DoJump` to prevent the character from re-entering the climbing state right after:
+Climbing is done by holding down the `Climb` input, and it is possible to jump while climbing.
+This is done by overriding `CanAttemptJump` and adding a climbing cooldown in `DoJump` to prevent the character from re-entering the climbing state right after:
 
 ```cpp
 bool USampleCharacterMovementComponent::CanClimbInCurrentState() const
@@ -331,7 +331,7 @@ bool USampleCharacterMovementComponent::DoJump(bool bReplayingMoves)
 }
 ```
 
-As for `bWantsToClimb`, this cooldown is replicated to server via the custom `FSavedMove`:
+As for `bWantsToClimb`, this cooldown is replicated via the custom `FSavedMove`:
 
 ```cpp
 void FSavedMove_SampleCharacter::SetMoveFor(ACharacter* Character, float InDeltaTime, FVector const& NewAccel, class FNetworkPredictionData_Client_Character& ClientData)
