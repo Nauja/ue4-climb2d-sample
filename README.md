@@ -198,7 +198,7 @@ Entering the climbing state sets a custom movement mode:
 SetMovementMode(EMovementMode::MOVE_Custom, (uint8)ESampleMovementMode::MOVE_Climbing);
 ```
 
-In this mode, all the physics is handled in `PhysCustomClimbing` that is merely a copy of `PhysFlying`:
+In this mode, all the physics is handled in `PhysCustomClimbing` that is a copy of `PhysFlying` with slight modifications:
 
 ```cpp
 void USampleCharacterMovementComponent::PhysCustomClimbing(float deltaTime, int32 Iterations)
