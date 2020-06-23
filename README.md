@@ -14,15 +14,14 @@ Prerequisites:
   * [Pixel Perfect 2D Sample](https://github.com/Nauja/ue4-pixelperfect2d-sample)
 
 Features:
-  * Instructions
+  * Keyboard/Gamepad controls
   * Detecting when character can climb
   * Switching to climbing movement mode
   * Moving while climbing
   * Allowing to jump while climbing
 
-### Instructions
+### Keyboard/Gamepad controls
 
-Keyboard/Gamepad controls:
   * Z(A)QSD/Left Thumbstick: move
   * Space/Face Bottom Button: jump
   * Left CTRL/Right Trigger (hold): climb
