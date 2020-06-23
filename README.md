@@ -263,32 +263,26 @@ Inputs are handled in `ASampleCharacter.cpp`:
 
 void ASampleCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
-	// Note: the 'Jump' action and the 'MoveRight' axis are bound to actual keys/buttons/sticks in DefaultInput.ini (editable from Project Settings..Input)
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
-	PlayerInputComponent->BindAction("Climb", IE_Pressed, this, &ASampleCharacter::StartClimb);
-	PlayerInputComponent->BindAction("Climb", IE_Released, this, &ASampleCharacter::StopClimb);
-	PlayerInputComponent->BindAxis("MoveRight", this, &ASampleCharacter::MoveRight);
-	PlayerInputComponent->BindAxis("MoveUp", this, &ASampleCharacter::MoveUp);
+    ...
+    PlayerInputComponent->BindAxis("MoveRight", this, &ASampleCharacter::MoveRight);
+    PlayerInputComponent->BindAxis("MoveUp", this, &ASampleCharacter::MoveUp);
 }
 
 void ASampleCharacter::MoveRight(float Value)
 {
-	/*UpdateChar();*/
-
-	// Apply the input to the character motion
-	AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value);
+    // Apply the input to the character motion
+    AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value);
 }
 
 void ASampleCharacter::MoveUp(float Value)
 {
-	// Can only move up if climbing
-	USampleCharacterMovementComponent* MoveComponent = Cast<USampleCharacterMovementComponent>(GetMovementComponent());
+    // Can only move up if climbing
+    USampleCharacterMovementComponent* MoveComponent = Cast<USampleCharacterMovementComponent>(GetMovementComponent());
 
-	if (MoveComponent && MoveComponent->IsClimbing())
-	{
-		AddMovementInput(FVector(0.0f, 0.0f, 1.0f), Value);
-	}
+    if (MoveComponent && MoveComponent->IsClimbing())
+    {
+        AddMovementInput(FVector(0.0f, 0.0f, 1.0f), Value);
+    }
 }
 ```
 
