@@ -192,7 +192,7 @@ void USampleCharacterMovementComponent::UpdateCharacterStateAfterMovement(float 
 
 ### Moving while climbing
 
-Entering the climbing state set a custom movement mode:
+Entering the climbing state sets a custom movement mode:
 
 ```cpp
 SetMovementMode(EMovementMode::MOVE_Custom, (uint8)ESampleMovementMode::MOVE_Climbing);
