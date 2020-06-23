@@ -192,7 +192,7 @@ void USampleCharacterMovementComponent::UpdateCharacterStateAfterMovement(float 
 ### Allowing to jump while climbing
 
 Climbing is done by holding down the `Climb` input, and it is possible de jump while climbing.
-This is done by setting a climbing cooldown in `DoJump` to prevent the character from re-entering climbing state right after:
+This is done by setting a climbing cooldown in `DoJump` to prevent the character from re-entering the climbing state right after:
 
 ```cpp
 bool USampleCharacterMovementComponent::CanClimbInCurrentState() const
@@ -225,6 +225,82 @@ bool USampleCharacterMovementComponent::DoJump(bool bReplayingMoves)
     }
 
     return false;
+}
+```
+
+As for `bWantsToClimb`, this cooldown is replicated to server via the custom `FSavedMove`:
+
+```cpp
+void FSavedMove_SampleCharacter::SetMoveFor(ACharacter* Character, float InDeltaTime, FVector const& NewAccel, class FNetworkPredictionData_Client_Character& ClientData)
+{
+    // Character -> Save
+    USampleCharacterMovementComponent* MoveComponent = Cast<USampleCharacterMovementComponent>(Character->GetMovementComponent());
+
+    ClimbTimer = MoveComponent->ClimbTimer;
+    ...
+
+    Super::SetMoveFor(Character, InDeltaTime, NewAccel, ClientData);
+}
+
+void FSavedMove_SampleCharacter::PrepMoveFor(ACharacter* Character)
+{
+    // Save -> Character
+    USampleCharacterMovementComponent* MoveComponent = Cast<USampleCharacterMovementComponent>(Character->GetCharacterMovement());
+    if (MoveComponent)
+    {
+        MoveComponent->ClimbTimer = ClimbTimer;
+        ...
+    }
+
+    Super::PrepMoveFor(Character);
+}
+```
+
+It is important to implement the `IsImportantMove`, `CanCombineWith` and `CombineWith` functions correctly so we don't
+send too many packets between the client and server:
+
+```cpp
+bool FSavedMove_SampleCharacter::CanCombineWith(const FSavedMovePtr& NewMove, ACharacter* Character, float MaxDelta) const
+{
+    const FSavedMove_SampleCharacter* SampleNewMove = (FSavedMove_SampleCharacter*)&NewMove;
+
+    if (!FMath::IsNearlyEqual(ClimbTimer, SampleNewMove->ClimbTimer, ClimbTimerThresholdCombine))
+    {
+        return false;
+    }
+
+    if ((ClimbTimer <= 0.0f) != (SampleNewMove->ClimbTimer <= 0.0f))
+    {
+        return false;
+    }
+
+    if ((ClimbTimer > 0.0f) != (SampleNewMove->ClimbTimer > 0.0f))
+    {
+        return false;
+    }
+
+    return Super::CanCombineWith(NewMove, Character, MaxDelta);
+}
+
+void FSavedMove_SampleCharacter::CombineWith(const FSavedMove_Character* OldMove, ACharacter* InCharacter, APlayerController* PC, const FVector& OldStartLocation)
+{
+    const FSavedMove_SampleCharacter* SampleNewMove = (FSavedMove_SampleCharacter*)&OldMove;
+
+    ClimbTimer = SampleNewMove->ClimbTimer;
+
+    Super::CombineWith(OldMove, InCharacter, PC, OldStartLocation);
+}
+
+bool FSavedMove_SampleCharacter::IsImportantMove(const FSavedMovePtr& LastAckedMove) const
+{
+    const FSavedMove_SampleCharacter* SampleLastAckedMove = (FSavedMove_SampleCharacter*)&LastAckedMove;
+
+    if (!FMath::IsNearlyEqual(ClimbTimer, SampleLastAckedMove->ClimbTimer, ClimbTimerThresholdCombine))
+    {
+        return true;
+    }
+
+    return Super::IsImportantMove(LastAckedMove);
 }
 ```
 
