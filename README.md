@@ -21,6 +21,38 @@ Prerequisites:
 Features:
   * wip
 
+### Detecting when player can climb
+
+While the map is created with a TileMap, it is not used to identify the tiles that character can climb.
+Instead we use climbable volumes that are directly placed in the level to represent climbable surfaces:
+
+![Preview](https://github.com/Nauja/ue4-climb2d-sample/raw/master/docs/editor-climbable-volume.png)
+
+The implementation of `ASampleClimbableVolume.cpp` is quite simple as it only serve to detect overlapping with
+the character:
+
+```cpp
+void ASampleClimbableVolume::NotifyActorBeginOverlap(class AActor* Other)
+{
+    Super::NotifyActorBeginOverlap(Other);
+
+    if (IsValid(Other) && !IsPendingKill())
+    {
+        StaticCast<ASampleCharacter*>(Other)->AddClimbableVolume(this);
+    }
+}
+
+void ASampleClimbableVolume::NotifyActorEndOverlap(class AActor* Other)
+{
+    Super::NotifyActorEndOverlap(Other);
+
+    if (IsValid(Other) && !IsPendingKill())
+    {
+        StaticCast<ASampleCharacter*>(Other)->RemoveClimbableVolume(this);
+    }
+}
+```
+
 ### Credits
 
 Sprites are coming from [The Spriters Resource](https://www.spriters-resource.com/).
