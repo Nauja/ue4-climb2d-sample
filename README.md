@@ -256,7 +256,7 @@ void FSavedMove_SampleCharacter::PrepMoveFor(ACharacter* Character)
 }
 ```
 
-It is important to implement the `IsImportantMove`, `CanCombineWith` and `CombineWith` functions correctly so we don't
+It is important to implement `IsImportantMove`, `CanCombineWith` and `CombineWith` functions correctly so we don't
 send too many packets between the client and server:
 
 ```cpp
