@@ -32,6 +32,10 @@ It is possible to jump while climbing. If so, the character will have a slight c
 
 It is encouraged to test the climbing system in multiplayer with `Net PktLag=X`, `Net PktLoss=X`, `Net PktOrder=X` debug commands.
 
+This is the result in multiplayer with `Net PktLoss=10`:
+
+![PktLoss](https://github.com/Nauja/ue4-climb2d-sample/raw/master/docs/pktloss.gif)
+
 ### Detecting when character can climb
 
 While the map is created with a TileMap, it is not used to identify the tiles that character can climb.
