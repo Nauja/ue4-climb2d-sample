@@ -69,6 +69,19 @@ ASampleCharacter::ASampleCharacter(const FObjectInitializer& ObjectInitializer)
 	bReplicates = true;
 }
 
+void ASampleCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	APlayerController* PlayerController = (APlayerController*)Controller;
+
+	if (PlayerController)
+	{
+		PlayerController->ConsoleCommand(TEXT("showflag.postprocessing 0"));
+		PlayerController->ConsoleCommand(TEXT("r.SetRes 512x448w"));
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Animation
 
