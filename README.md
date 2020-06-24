@@ -32,11 +32,11 @@ It is possible to jump while climbing. If so, the character will have a slight c
 
 It is encouraged to test the climbing system in multiplayer with `Net PktLag=X`, `Net PktLoss=X`, `Net PktOrder=X` debug commands.
 
-This is the result in multiplayer with `Net PktLoss=10`:
+This is the result in multiplayer with `Net PktLoss=10` (client on left):
 
 ![PktLoss](https://github.com/Nauja/ue4-climb2d-sample/raw/master/docs/pktloss.gif)
 
-This is the result in multiplayer with `Net PktLag=100`:
+This is the result in multiplayer with `Net PktLag=100` (client on left):
 
 ![PktLag](https://github.com/Nauja/ue4-climb2d-sample/raw/master/docs/pktlag.gif)
 
