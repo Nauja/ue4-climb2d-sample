@@ -36,6 +36,10 @@ This is the result in multiplayer with `Net PktLoss=10`:
 
 ![PktLoss](https://github.com/Nauja/ue4-climb2d-sample/raw/master/docs/pktloss.gif)
 
+This is the result in multiplayer with `Net PktLag=100`:
+
+![PktLag](https://github.com/Nauja/ue4-climb2d-sample/raw/master/docs/pktlag.gif)
+
 ### Detecting when character can climb
 
 While the map is created with a TileMap, it is not used to identify the tiles that character can climb.
