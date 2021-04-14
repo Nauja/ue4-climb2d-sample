@@ -1,7 +1,7 @@
 # ue4-climb2d-sample
 
 ![UE4](https://img.shields.io/badge/UE4-4.25+-blue)
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/Nauja/ue4-jetpack-sample/master/LICENSE)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/Nauja/ue4-climb2d-sample/master/LICENSE)
 
 Sample of a custom climbing movement done with Paper2D.
 
