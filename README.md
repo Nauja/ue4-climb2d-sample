@@ -5,7 +5,7 @@
 
 Sample of a custom climbing movement done with Paper2D.
 
-![Preview](https://github.com/Nauja/ue4-climb2d-sample/raw/master/docs/preview.gif)
+![Preview](https://github.com/Nauja/ue4-climb2d-sample/raw/media/preview.gif)
 
 This project is an example of how to write a custom climbing movement in a Paper2D game, with the constraint of
 being fully replicated over network.
@@ -34,18 +34,18 @@ It is encouraged to test the climbing system in multiplayer with `Net PktLag=X`,
 
 This is the result in multiplayer with `Net PktLoss=10` (client on left):
 
-![PktLoss](https://github.com/Nauja/ue4-climb2d-sample/raw/master/docs/pktloss.gif)
+![PktLoss](https://github.com/Nauja/ue4-climb2d-sample/raw/media/pktloss.gif)
 
 This is the result in multiplayer with `Net PktLag=100` (client on left):
 
-![PktLag](https://github.com/Nauja/ue4-climb2d-sample/raw/master/docs/pktlag.gif)
+![PktLag](https://github.com/Nauja/ue4-climb2d-sample/raw/media/pktlag.gif)
 
 ### Detecting when character can climb
 
 While the map is created with a TileMap, it is not used to identify the tiles that character can climb.
 Instead we use climbable volumes that are directly placed in the level to represent the climbable surfaces:
 
-![Preview](https://github.com/Nauja/ue4-climb2d-sample/raw/master/docs/editor-climbable-volume.png)
+![Preview](https://github.com/Nauja/ue4-climb2d-sample/raw/media/editor-climbable-volume.png)
 
 The implementation of `ASampleClimbableVolume.cpp` is quite simple as it only serve to detect overlapping with
 the character:
