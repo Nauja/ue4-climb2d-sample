@@ -13,12 +13,13 @@ being fully replicated over network.
 Prerequisites:
   * [Pixel Perfect 2D Sample](https://github.com/Nauja/ue4-pixelperfect2d-sample)
 
-Features:
-  * Keyboard/Gamepad controls
-  * Detecting when character can climb
-  * Switching to climbing movement mode
-  * Moving while climbing
-  * Allowing to jump while climbing
+## Table of contents:
+
+- [Keyboard/Gamepad controls](#keyboardgamepad_controls)
+- [Detecting when character can climb](#detecting-when-character-can-climb)
+- [Switching to climbing movement mode](#switching-to-climbing-movement-mode)
+- [Moving while climbing](#moving-while-climbing)
+- [Allowing to jump while climbing](#allowing-to-jump-while-climbing)
 
 ### Keyboard/Gamepad controls
 
