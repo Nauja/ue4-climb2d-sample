@@ -21,7 +21,7 @@ Prerequisites:
 - [Moving while climbing](#moving-while-climbing)
 - [Allowing to jump while climbing](#allowing-to-jump-while-climbing)
 
-### Keyboard/Gamepad controls
+## Keyboard/Gamepad controls
 
   * Z(A)QSD/Left Thumbstick: move
   * Space/Face Bottom Button: jump
@@ -41,7 +41,7 @@ This is the result in multiplayer with `Net PktLag=100` (client on left):
 
 ![PktLag](https://github.com/Nauja/ue4-climb2d-sample/raw/media/pktlag.gif)
 
-### Detecting when character can climb
+## Detecting when character can climb
 
 While the map is created with a TileMap, it is not used to identify the tiles that character can climb.
 Instead we use climbable volumes that are directly placed in the level to represent the climbable surfaces:
@@ -92,7 +92,7 @@ void ASampleCharacter::RemoveClimbableVolume(ASampleClimbableVolume* Volume)
 }
 ```
 
-### Switching to climbing movement mode
+## Switching to climbing movement mode
 
 The climbing system works in a similar way to the crouching system. When pressing/releasing the
 `Climb` input, we toggle a boolean `bWantsToClimb` in the movement component:
@@ -198,7 +198,7 @@ void USampleCharacterMovementComponent::UpdateCharacterStateAfterMovement(float 
 }
 ```
 
-### Moving while climbing
+## Moving while climbing
 
 Entering the climbing state sets a custom movement mode:
 
@@ -294,7 +294,7 @@ void ASampleCharacter::MoveUp(float Value)
 }
 ```
 
-### Allowing to jump while climbing
+## Allowing to jump while climbing
 
 Climbing is done by holding down the `Climb` input, and it is possible to jump while climbing.
 This is done by overriding `CanAttemptJump` and adding a climbing cooldown in `DoJump` to prevent the character from re-entering the climbing state right after:
@@ -409,7 +409,7 @@ bool FSavedMove_SampleCharacter::IsImportantMove(const FSavedMovePtr& LastAckedM
 }
 ```
 
-### Credits
+## Credits
 
 Sprites are coming from [The Spriters Resource](https://www.spriters-resource.com/).
 
