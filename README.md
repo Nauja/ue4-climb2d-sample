@@ -13,7 +13,7 @@ being fully replicated over network.
 Prerequisites:
   * [Pixel Perfect 2D Sample](https://github.com/Nauja/ue4-pixelperfect2d-sample)
 
-For an Unreal Engine 4 version, check the branch [ue4.25](https://github.com/Nauja/ue4-climb2d-sample/tree/ue4.25).
+For an Unreal Engine 5 version, check the branch [ue5.2](https://github.com/Nauja/ue4-climb2d-sample/tree/ue5.2).
 
 ## Table of contents:
 
