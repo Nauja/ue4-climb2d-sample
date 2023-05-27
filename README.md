@@ -1,17 +1,19 @@
 # ue4-climb2d-sample
 
-![UE4](https://img.shields.io/badge/UE4-4.25+-blue)
+![UE5](https://img.shields.io/badge/UE5-5.2+-blue)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/Nauja/ue4-climb2d-sample/master/LICENSE)
 
-Sample of a custom climbing movement done with Paper2D.
+Sample of a custom climbing movement done in Unreal Engine 5 with Paper2D.
 
-![Preview](https://github.com/Nauja/ue4-climb2d-sample/raw/media/preview.gif)
+![Preview](https://github.com/Nauja/ue4-climb2d-sample/raw/media5.2/preview.gif)
 
 This project is an example of how to write a custom climbing movement in a Paper2D game, with the constraint of
 being fully replicated over network.
 
 Prerequisites:
   * [Pixel Perfect 2D Sample](https://github.com/Nauja/ue4-pixelperfect2d-sample)
+
+For an Unreal Engine 4 version, check the branch [ue4.25](https://github.com/Nauja/ue4-climb2d-sample/tree/ue4.25).
 
 ## Table of contents:
 
@@ -35,18 +37,18 @@ It is encouraged to test the climbing system in multiplayer with `Net PktLag=X`,
 
 This is the result in multiplayer with `Net PktLoss=10` (client on left):
 
-![PktLoss](https://github.com/Nauja/ue4-climb2d-sample/raw/media/pktloss.gif)
+![PktLoss](https://github.com/Nauja/ue4-climb2d-sample/raw/media5.2/pktloss.gif)
 
 This is the result in multiplayer with `Net PktLag=100` (client on left):
 
-![PktLag](https://github.com/Nauja/ue4-climb2d-sample/raw/media/pktlag.gif)
+![PktLag](https://github.com/Nauja/ue4-climb2d-sample/raw/media5.2/pktlag.gif)
 
 ## Detecting when character can climb
 
 While the map is created with a TileMap, it is not used to identify the tiles that character can climb.
 Instead we use climbable volumes that are directly placed in the level to represent the climbable surfaces:
 
-![Preview](https://github.com/Nauja/ue4-climb2d-sample/raw/media/editor-climbable-volume.png)
+![Preview](https://github.com/Nauja/ue4-climb2d-sample/raw/media5.2/editor-climbable-volume.png)
 
 The implementation of `ASampleClimbableVolume.cpp` is quite simple as it only serve to detect overlapping with
 the character:
