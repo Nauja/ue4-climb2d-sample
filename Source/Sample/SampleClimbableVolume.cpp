@@ -16,7 +16,7 @@ void ASampleClimbableVolume::NotifyActorBeginOverlap(class AActor* Other)
 {
     Super::NotifyActorBeginOverlap(Other);
 
-    if (IsValid(Other) && !IsPendingKill())
+    if (IsValid(Other) && IsValid(this))
     {
         StaticCast<ASampleCharacter*>(Other)->AddClimbableVolume(this);
     }
@@ -26,7 +26,7 @@ void ASampleClimbableVolume::NotifyActorEndOverlap(class AActor* Other)
 {
     Super::NotifyActorEndOverlap(Other);
 
-    if (IsValid(Other) && !IsPendingKill())
+    if (IsValid(Other) && IsValid(this))
     {
         StaticCast<ASampleCharacter*>(Other)->RemoveClimbableVolume(this);
     }
