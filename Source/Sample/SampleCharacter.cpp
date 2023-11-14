@@ -77,7 +77,6 @@ void ASampleCharacter::BeginPlay()
 
 	if (PlayerController)
 	{
-		PlayerController->ConsoleCommand(TEXT("showflag.postprocessing 0"));
 		PlayerController->ConsoleCommand(TEXT("r.SetRes 512x448w"));
 	}
 }
